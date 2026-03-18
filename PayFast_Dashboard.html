@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PayFast Nigeria — Product Analytics Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--bg:#0a0e1a;--bg2:#0f1525;--bg3:#141c30;--card:#131929;--card2:#1a2338;--border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);--text:#f0f4ff;--text2:#8892aa;--text3:#556070;--accent:#4f8ef7;--accent2:#7c5cfc;--green:#22c97a;--red:#f75b5b;--amber:#f5a623;--teal:#18c8c8;--purple:#9b6dff}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:18px;height:18px;fill:none;stroke:white;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.logo-name{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text)}
+.logo-tag{font-size:11px;color:var(--text3);font-weight:300;letter-spacing:0.04em}
+.header-right{display:flex;align-items:center;gap:12px}
+.period-badge{background:var(--card2);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:5px 14px;border-radius:20px}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.main{padding:28px 32px;max-width:1400px;margin:0 auto}
+.section-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0}
+.kpi-card.blue::before{background:var(--accent)}
+.kpi-card.green::before{background:var(--green)}
+.kpi-card.amber::before{background:var(--amber)}
+.kpi-card.red::before{background:var(--red)}
+.kpi-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px}
+.kpi-value{font-family:'Syne',sans-serif;font-size:30px;font-weight:700;color:var(--text);line-height:1;margin-bottom:6px}
+.kpi-sub{font-size:12px;color:var(--text2);font-weight:300}
+.kpi-badge{display:inline-flex;align-items:center;font-size:11px;padding:3px 8px;border-radius:6px;margin-top:8px;font-weight:500}
+.badge-green{background:rgba(34,201,122,0.12);color:var(--green)}
+.badge-red{background:rgba(247,91,91,0.12);color:var(--red)}
+.badge-amber{background:rgba(245,166,35,0.12);color:var(--amber)}
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:32px}
+.charts-row-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px 24px}
+.chart-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+.chart-sub{font-size:12px;color:var(--text3);margin-bottom:18px;font-weight:300;line-height:1.5}
+.cohort-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.cohort-table th{color:var(--text3);font-weight:400;text-align:center;padding:8px 6px;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)}
+.cohort-table td{text-align:center;padding:9px 6px;border-bottom:1px solid var(--border);font-weight:500}
+.cohort-table td:first-child{text-align:left;color:var(--text2);font-size:12px;font-family:'Syne',sans-serif}
+.h0{color:#556070}.h1{color:#3d7cf0;background:rgba(61,124,240,0.07);border-radius:5px}.h2{color:#5b8ef5;background:rgba(91,142,245,0.09);border-radius:5px}.h3{color:#22c97a;background:rgba(34,201,122,0.09);border-radius:5px}.h4{color:#34d88a;background:rgba(52,216,138,0.11);border-radius:5px}.h5{color:#56e8a0;background:rgba(86,232,160,0.13);border-radius:5px}
+.seg-table{width:100%;border-collapse:collapse;font-size:13px}
+.seg-table th{color:var(--text3);font-weight:400;padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)}
+.seg-table td{padding:11px 12px;border-bottom:1px solid var(--border)}
+.seg-badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.sp{background:rgba(155,109,255,0.15);color:var(--purple)}
+.sr{background:rgba(79,142,247,0.15);color:var(--accent)}
+.sc{background:rgba(24,200,200,0.15);color:var(--teal)}
+.sa{background:rgba(245,166,35,0.15);color:var(--amber)}
+.sx{background:rgba(247,91,91,0.15);color:var(--red)}
+.ab-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.ab-box{border-radius:12px;padding:18px 20px;border:1px solid var(--border)}
+.ab-ctrl{background:rgba(255,255,255,0.02)}
+.ab-win{background:rgba(34,201,122,0.04);border-color:rgba(34,201,122,0.2)}
+.ab-lbl{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:10px;font-weight:500}
+.ab-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--text);line-height:1;margin-bottom:2px}
+.ab-val.w{color:var(--green)}
+.ab-desc{font-size:11px;color:var(--text3);margin-bottom:8px}
+.prog{height:4px;background:rgba(255,255,255,0.06);border-radius:2px}
+.prog-fill{height:4px;border-radius:2px}
+.win-banner{background:rgba(34,201,122,0.08);border:1px solid rgba(34,201,122,0.2);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--green);font-weight:500}
+.insights-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px}
+.ins-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px}
+.ins-num{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px}
+.ins-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.4}
+.ins-body{font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px}
+.ins-action{font-size:11.5px;color:var(--accent);font-weight:500;border-top:1px solid var(--border);padding-top:10px}
+footer{border-top:1px solid var(--border);padding:20px 32px;display:flex;align-items:center;justify-content:space-between}
+.ft{font-size:12px;color:var(--text3)}
+.fade-in{animation:fi 0.5s ease forwards;opacity:0}
+@keyframes fi{to{opacity:1}}
+.kpi-card:nth-child(1){animation-delay:.1s}.kpi-card:nth-child(2){animation-delay:.2s}.kpi-card:nth-child(3){animation-delay:.3s}.kpi-card:nth-child(4){animation-delay:.4s}
+@media(max-width:900px){.kpi-grid,.charts-row,.charts-row-2,.insights-grid,.ab-grid{grid-template-columns:1fr}.main{padding:16px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+    <div><div class="logo-name">PayFast Nigeria</div><div class="logo-tag">Product Analytics Dashboard — 2024</div></div>
+  </div>
+  <div class="header-right">
+    <div class="live-dot"></div>
+    <div class="period-badge">Jan – Sep 2024</div>
+    <div class="period-badge">10,000 Users</div>
+  </div>
+</header>
+
+<div class="main">
+
+<div class="section-title">Key metrics</div>
+<div class="kpi-grid">
+  <div class="kpi-card blue fade-in"><div class="kpi-label">Total Users</div><div class="kpi-value">10,000</div><div class="kpi-sub">Jan – Jun 2024 cohorts</div><div class="kpi-badge badge-green">6 monthly cohorts</div></div>
+  <div class="kpi-card green fade-in"><div class="kpi-label">Activation Rate</div><div class="kpi-value">54.3%</div><div class="kpi-sub">5,433 users activated</div><div class="kpi-badge badge-amber">Benchmark: 60–70%</div></div>
+  <div class="kpi-card amber fade-in"><div class="kpi-label">Total Revenue</div><div class="kpi-value">₦474.8M</div><div class="kpi-sub">24,673 successful tx</div><div class="kpi-badge badge-green">Avg ₦19,246 / tx</div></div>
+  <div class="kpi-card red fade-in"><div class="kpi-label">Churn Rate</div><div class="kpi-value">87.8%</div><div class="kpi-sub">4,768 churned users</div><div class="kpi-badge badge-red">Critical — action needed</div></div>
+</div>
+
+<div class="section-title">Revenue and growth</div>
+<div class="charts-row">
+  <div class="chart-card">
+    <div class="chart-title">Monthly Revenue Trend</div>
+    <div class="chart-sub">Revenue grew 21x from January to peak in July (₦83.6M), then declined 38% as cohort quality dropped</div>
+    <div style="position:relative;height:260px"><canvas id="revenueChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">Revenue per Active User</div>
+    <div class="chart-sub">Consistent ₦91k–₦103k/month — the monetisation model is strong. Problem is retention not revenue quality.</div>
+    <div style="position:relative;height:260px"><canvas id="rpuChart"></canvas></div>
+  </div>
+</div>
+
+<div class="section-title">Retention and cohort analysis</div>
+<div class="charts-row-2">
+  <div class="chart-card">
+    <div class="chart-title">Cohort Retention Table</div>
+    <div class="chart-sub">% of users still active N months after signup. Darker green = stronger retention. All cohorts declining — no stable base.</div>
+    <table class="cohort-table">
+      <thead><tr><th style="text-align:left">Cohort</th><th>Size</th><th>M+1</th><th>M+2</th><th>M+3</th><th>M+4</th><th>M+5</th></tr></thead>
+      <tbody id="cohortBody"></tbody>
+    </table>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">Retention Curves by Cohort</div>
+    <div class="chart-sub">Every line slopes downward — no cohort has reached a stable retention floor yet</div>
+    <div style="position:relative;height:240px"><canvas id="retentionChart"></canvas></div>
+  </div>
+</div>
+
+<div class="section-title">User segmentation</div>
+<div class="charts-row">
+  <div class="chart-card">
+    <div class="chart-title">Segment Analysis</div>
+    <div class="chart-sub">141 Power Users (2.6%) spend 8.5x more than churned users. 288 At-Risk users = ₦65M recoverable this month.</div>
+    <table class="seg-table" style="margin-top:4px">
+      <thead><tr><th>Segment</th><th>Users</th><th>% Base</th><th>Avg Tx</th><th>Avg Spend</th><th>Spend Bar</th></tr></thead>
+      <tbody id="segBody"></tbody>
+    </table>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">Average Spend by Segment</div>
+    <div class="chart-sub">Power Users outspend every other segment — protecting this group is the highest-value action available</div>
+    <div style="position:relative;height:260px"><canvas id="segChart"></canvas></div>
+  </div>
+</div>
+
+<div class="section-title">A/B test — onboarding redesign</div>
+<div class="charts-row-2">
+  <div class="chart-card">
+    <div class="chart-title">Test Results — Variant B Wins Conclusively</div>
+    <div class="chart-sub">p &lt; 0.0001 — greater than 99.99% statistical confidence — ship immediately</div>
+    <div class="ab-grid">
+      <div class="ab-box ab-ctrl">
+        <div class="ab-lbl">Control (existing)</div>
+        <div class="ab-val">56.2%</div><div class="ab-desc">Onboarding completion</div>
+        <div class="prog"><div class="prog-fill" style="width:56.2%;background:#4f8ef7"></div></div>
+        <br>
+        <div class="ab-val">51.5%</div><div class="ab-desc">Activation rate</div>
+        <div class="prog"><div class="prog-fill" style="width:51.5%;background:#4f8ef7"></div></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:10px">4,969 users</div>
+      </div>
+      <div class="ab-box ab-win">
+        <div class="ab-lbl" style="color:var(--green)">Variant B (redesigned)</div>
+        <div class="ab-val w">72.7%</div><div class="ab-desc">Onboarding completion</div>
+        <div class="prog"><div class="prog-fill" style="width:72.7%;background:var(--green)"></div></div>
+        <br>
+        <div class="ab-val w">57.1%</div><div class="ab-desc">Activation rate</div>
+        <div class="prog"><div class="prog-fill" style="width:57.1%;background:var(--green)"></div></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:10px">5,031 users</div>
+      </div>
+    </div>
+    <div class="win-banner">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Variant B: +11.0% activation lift — +₦48M revenue per cohort if shipped now
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">Control vs Variant B Comparison</div>
+    <div class="chart-sub">Both onboarding completion and activation rate improved significantly with Variant B</div>
+    <div style="position:relative;height:220px"><canvas id="abChart"></canvas></div>
+  </div>
+</div>
+
+<div class="section-title">Key findings and recommendations</div>
+<div class="insights-grid">
+  <div class="ins-card"><div class="ins-num">Finding 01</div><div class="ins-title">Retention declining cohort-over-cohort</div><div class="ins-body">January cohort retained 43.2% in M+1. June cohort only 27.9% — a 35% deterioration in 6 months. No cohort has stabilised.</div><div class="ins-action">Audit acquisition channels. Pause high-churn Paid Ads (95.2% churn).</div></div>
+  <div class="ins-card"><div class="ins-num">Finding 02</div><div class="ins-title">KYC blocks 82% from ever transacting</div><div class="ins-body">Only 4.7% of acquired users make a first transaction. Fintech benchmark is 8–15%. KYC friction at document submission is the primary barrier.</div><div class="ins-action">Redesign KYC — step-by-step, save-and-return, live document feedback.</div></div>
+  <div class="ins-card"><div class="ins-num">Finding 03</div><div class="ins-title">288 At-Risk users = ₦65M recoverable</div><div class="ins-body">These users averaged 12.1 transactions and ₦226k prior spend. A personalised re-engagement campaign can recover ~₦26M this month at zero acquisition cost.</div><div class="ins-action">Launch WhatsApp campaign with ₦500 cashback offer this week.</div></div>
+  <div class="ins-card"><div class="ins-num">Finding 04</div><div class="ins-title">Ship Variant B onboarding now</div><div class="ins-body">+11% activation lift, p &lt; 0.0001. Every month of delay costs ~₦48M in lost revenue from users who would have activated but did not.</div><div class="ins-action">Deploy Variant B to 100% of users within 7 days.</div></div>
+  <div class="ins-card"><div class="ins-num">Finding 05</div><div class="ins-title">Revenue peaked July, -38% since</div><div class="ins-body">Revenue per active user (₦91k–₦103k/month) is excellent. The entire decline is explained by cohort quality deterioration — not user spending less.</div><div class="ins-action">5-point retention improvement = ₦30–40M/month recovered by Q1 2025.</div></div>
+  <div class="ins-card"><div class="ins-num">Finding 06</div><div class="ins-title">141 Power Users drive 41.7% of revenue</div><div class="ins-body">Power Users average 27 transactions and ₦545k spend. Premium users spend 6.2x more than Free. Converting 200 Free users to Premium = +₦41M.</div><div class="ins-action">Build Power User loyalty programme — priority support, higher limits.</div></div>
+</div>
+
+</div>
+
+<footer>
+  <div class="ft">PayFast Nigeria — Product Analytics Dashboard — September 2024</div>
+  <div class="ft">Portfolio project — built with Python, SQL, and Chart.js</div>
+</footer>
+
+<script>
+const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+const revenue = [3.97,31.77,53.62,63.07,72.90,79.42,83.64,52.10,34.37];
+const activeUsers = [85,314,529,629,753,863,812,570,375];
+const rpu = [46.7,101.2,101.4,100.3,96.8,92.0,103.0,91.4,91.6];
+
+const cohorts = [
+  {label:'Jan 2024',size:1714,vals:[43.2,30.6,24.4,20.3,16.0]},
+  {label:'Feb 2024',size:1613,vals:[41.2,27.5,21.6,17.6,13.5]},
+  {label:'Mar 2024',size:1720,vals:[38.7,23.5,17.9,13.6,10.0]},
+  {label:'Apr 2024',size:1624,vals:[36.8,21.2,14.2,9.7,5.6]},
+  {label:'May 2024',size:1678,vals:[33.9,18.4,12.1,6.1,null]},
+  {label:'Jun 2024',size:1651,vals:[27.9,13.9,6.1,null,null]},
+];
+
+const segments = [
+  {name:'Power User',count:141,pct:2.6,avg_tx:27.0,avg_spend:545564,cls:'sp',color:'#9b6dff'},
+  {name:'Regular User',count:174,pct:3.2,avg_tx:9.1,avg_spend:135480,cls:'sr',color:'#4f8ef7'},
+  {name:'At-Risk',count:288,pct:5.3,avg_tx:12.1,avg_spend:226047,cls:'sa',color:'#f5a623'},
+  {name:'Casual User',count:62,pct:1.1,avg_tx:3.0,avg_spend:41742,cls:'sc',color:'#18c8c8'},
+  {name:'Churned',count:4768,pct:87.8,avg_tx:3.3,avg_spend:64317,cls:'sx',color:'#f75b5b'},
+];
+
+const chartDefaults = {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}};
+
+new Chart(document.getElementById('revenueChart'),{
+  type:'bar',
+  data:{labels:months,datasets:[
+    {label:'Revenue ₦M',data:revenue,backgroundColor:revenue.map((v,i)=>i===6?'rgba(79,142,247,0.85)':'rgba(79,142,247,0.35)'),borderColor:revenue.map((v,i)=>i===6?'#4f8ef7':'rgba(79,142,247,0.5)'),borderWidth:1,borderRadius:5,yAxisID:'y'},
+    {type:'line',label:'Active Users',data:activeUsers,borderColor:'#22c97a',backgroundColor:'transparent',pointBackgroundColor:'#22c97a',pointRadius:3,borderWidth:2,yAxisID:'y2',tension:0.4}
+  ]},
+  options:{...chartDefaults,plugins:{legend:{display:false}},scales:{
+    y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#556070',font:{size:11},callback:v=>'₦'+v+'M'},border:{display:false}},
+    y2:{position:'right',grid:{display:false},ticks:{color:'#22c97a',font:{size:11}},border:{display:false}},
+    x:{grid:{display:false},ticks:{color:'#556070',font:{size:11}},border:{display:false}}
+  }}
+});
+
+new Chart(document.getElementById('rpuChart'),{
+  type:'line',
+  data:{labels:months,datasets:[{data:rpu,fill:true,borderColor:'#f5a623',backgroundColor:'rgba(245,166,35,0.07)',pointBackgroundColor:'#f5a623',pointRadius:4,borderWidth:2.5,tension:0.4}]},
+  options:{...chartDefaults,scales:{
+    y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#556070',font:{size:11},callback:v=>'₦'+v+'k'},border:{display:false},min:0,max:120},
+    x:{grid:{display:false},ticks:{color:'#556070',font:{size:11}},border:{display:false}}
+  }}
+});
+
+const heatClass = v=>{if(!v)return 'h0';if(v>=35)return 'h5';if(v>=25)return 'h4';if(v>=18)return 'h3';if(v>=12)return 'h2';return 'h1';};
+const tbody=document.getElementById('cohortBody');
+cohorts.forEach(c=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${c.label}</td><td style="color:var(--text3)">${c.size.toLocaleString()}</td>`+c.vals.map(v=>v?`<td class="${heatClass(v)}">${v}%</td>`:`<td class="h0">—</td>`).join('');
+  tbody.appendChild(tr);
+});
+
+const retColors=['#4f8ef7','#7c5cfc','#22c97a','#f5a623','#f75b5b','#18c8c8'];
+new Chart(document.getElementById('retentionChart'),{
+  type:'line',
+  data:{labels:['M+1','M+2','M+3','M+4','M+5'],datasets:cohorts.map((c,i)=>({label:c.label,data:c.vals.filter(v=>v),borderColor:retColors[i],backgroundColor:'transparent',pointRadius:4,borderWidth:2,tension:0.3}))},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#8892aa',font:{size:10},boxWidth:12,padding:10}}},scales:{
+    y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#556070',font:{size:11},callback:v=>v+'%'},border:{display:false},min:0,max:50},
+    x:{grid:{display:false},ticks:{color:'#556070',font:{size:11}},border:{display:false}}
+  }}
+});
+
+const maxSpend=Math.max(...segments.map(s=>s.avg_spend));
+const segBody=document.getElementById('segBody');
+segments.forEach(s=>{
+  const w=Math.round(s.avg_spend/maxSpend*80);
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><span class="seg-badge ${s.cls}">${s.name}</span></td><td style="font-family:'Syne',sans-serif;font-weight:600;color:var(--text)">${s.count.toLocaleString()}</td><td style="color:var(--text2)">${s.pct}%</td><td style="color:var(--text2)">${s.avg_tx}</td><td style="font-family:'Syne',sans-serif;font-weight:600;color:${s.color}">₦${Math.round(s.avg_spend/1000)}k</td><td><div style="height:5px;width:${w}px;background:${s.color};border-radius:3px;opacity:0.8"></div></td>`;
+  segBody.appendChild(tr);
+});
+
+new Chart(document.getElementById('segChart'),{
+  type:'bar',
+  data:{labels:segments.map(s=>s.name),datasets:[{data:segments.map(s=>Math.round(s.avg_spend/1000)),backgroundColor:segments.map(s=>s.color+'55'),borderColor:segments.map(s=>s.color),borderWidth:1.5,borderRadius:6}]},
+  options:{...chartDefaults,scales:{
+    y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#556070',font:{size:11},callback:v=>'₦'+v+'k'},border:{display:false}},
+    x:{grid:{display:false},ticks:{color:'#8892aa',font:{size:11}},border:{display:false}}
+  }}
+});
+
+new Chart(document.getElementById('abChart'),{
+  type:'bar',
+  data:{labels:['Onboarding Completion','Activation Rate'],datasets:[
+    {label:'Control',data:[56.2,51.5],backgroundColor:'rgba(79,142,247,0.45)',borderColor:'#4f8ef7',borderWidth:1.5,borderRadius:5},
+    {label:'Variant B',data:[72.7,57.1],backgroundColor:'rgba(34,201,122,0.45)',borderColor:'#22c97a',borderWidth:1.5,borderRadius:5}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#8892aa',font:{size:11},boxWidth:12,padding:12}}},scales:{
+    y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#556070',font:{size:11},callback:v=>v+'%'},border:{display:false},min:0,max:85},
+    x:{grid:{display:false},ticks:{color:'#8892aa',font:{size:11}},border:{display:false}}
+  }}
+});
+</script>
+</body>
+</html>
