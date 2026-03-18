@@ -44,6 +44,7 @@ a professional case study report.
 | payfast_transactions.csv | 26,241 transaction records |
 | payfast_funnel.csv | 35,574 funnel events |
 
+
 ---
 
 ## How to View the Dashboard
